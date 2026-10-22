@@ -6,6 +6,8 @@ import { ChevronDown, User, Settings, LogOut, FileText, CreditCard, Folder, Shie
 import type { SessionUser } from "@/config/auth";
 import { signOut } from "@/app/login/actions";
 
+import { initials } from "@/lib/format";
+
 interface UserMenuProps {
   user: SessionUser;
   isNavy?: boolean;
@@ -58,7 +60,7 @@ export function UserMenu({ user, isNavy = false }: UserMenuProps) {
   ];
 
   const adminLinks = [
-    { label: "Settings", href: "/admin/settings/business", icon: Settings },
+    { label: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   const roleLinks =
@@ -67,6 +69,9 @@ export function UserMenu({ user, isNavy = false }: UserMenuProps) {
       : user.role === "agent"
       ? agentLinks
       : adminLinks;
+
+  const displayInitials =
+    user.role === "customer" ? initials(user.name) : user.avatarInitial;
 
   return (
     <div className="relative" ref={menuRef} onKeyDown={handleKeyDown}>
@@ -77,7 +82,7 @@ export function UserMenu({ user, isNavy = false }: UserMenuProps) {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label={`User menu for ${user.name}`}
-        className={`flex items-center gap-2.5 p-1 sm:px-2 sm:py-1.5 rounded-xl transition-colors cursor-pointer select-none ${
+        className={`flex items-center gap-2 p-1 sm:px-2 sm:py-1.5 rounded-xl transition-colors cursor-pointer select-none ${
           isNavy
             ? "hover:bg-white/10 text-white"
             : "hover:bg-slate-100 text-[#0B1B3F]"
@@ -85,21 +90,44 @@ export function UserMenu({ user, isNavy = false }: UserMenuProps) {
       >
         {/* Circular Avatar */}
         <div className="w-8 h-8 rounded-full bg-[#1F6BFF] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
-          {user.avatarInitial}
+          {displayInitials}
         </div>
 
-        {/* Name and Chevron (>=640px) */}
-        <div className="hidden sm:flex items-center gap-1.5 min-w-0">
-          <span className="text-sm font-semibold truncate max-w-[120px]">
-            {user.name}
-          </span>
-          <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-            aria-hidden="true"
-          />
-        </div>
+        {/* Customer variant: mobile shows chevron; >=768px adds name + caption */}
+        {user.role === "customer" ? (
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="hidden md:flex flex-col text-left leading-tight">
+              <span className="text-sm font-semibold truncate max-w-[120px]">
+                {user.name}
+              </span>
+              <span
+                className={`text-[11px] font-normal ${
+                  isNavy ? "text-slate-300" : "text-[#64748B]"
+                }`}
+              >
+                Customer
+              </span>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+              aria-hidden="true"
+            />
+          </div>
+        ) : (
+          <div className="hidden sm:flex items-center gap-1.5 min-w-0">
+            <span className="text-sm font-semibold truncate max-w-[120px]">
+              {user.name}
+            </span>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+              aria-hidden="true"
+            />
+          </div>
+        )}
       </button>
 
       {/* Dropdown Menu */}

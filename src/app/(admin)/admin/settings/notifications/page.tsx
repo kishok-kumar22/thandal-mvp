@@ -1,6 +1,7 @@
 import React from "react";
 import { getSettings } from "@/lib/settings";
 import { NotificationSettingsTable } from "@/components/settings/NotificationSettingsTable";
+import { SettingsHeader } from "@/components/settings/SettingsHeader";
 
 export const metadata = {
   title: "Notification Settings - Settings | THANDAL",
@@ -11,9 +12,15 @@ export default function NotificationSettingsPage() {
   const settings = getSettings();
 
   return (
-    <NotificationSettingsTable
-      initialNotifications={settings.notifications}
-      version={settings.versions.notifications}
-    />
+    <div className="space-y-6">
+      <SettingsHeader
+        title="Settings"
+        subtitle="Configure in-app event notifications, reminder lead days, and delivery rules."
+      />
+      <NotificationSettingsTable
+        initialNotifications={settings.notifications}
+        version={settings.versions.notifications}
+      />
+    </div>
   );
 }

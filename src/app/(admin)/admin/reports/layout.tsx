@@ -11,6 +11,8 @@ export const metadata = {
   description: "Financial, collection, portfolio, and audit reporting for THANDAL.",
 };
 
+export const instant = false;
+
 interface ReportsLayoutProps {
   children: React.ReactNode;
 }

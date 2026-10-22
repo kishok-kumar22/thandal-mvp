@@ -1,5 +1,12 @@
 export type SupportStatus = "open" | "in_progress" | "resolved";
 
+export type SupportKind = "general" | "callback" | "profile_correction";
+
+export interface SupportMeta {
+  field?: "name" | "mobile" | "address" | "other";
+  preferredTime?: "morning" | "afternoon" | "evening";
+}
+
 export interface SupportAttachmentMeta {
   name: string;
   size: number;
@@ -11,6 +18,8 @@ export interface SupportRequest {
   customerId: string; // "C-001"
   customerName?: string;
   loanId?: string; // e.g. "LN-1052"
+  kind: SupportKind;
+  meta?: SupportMeta;
   subject: string;
   message: string;
   attachment?: SupportAttachmentMeta;

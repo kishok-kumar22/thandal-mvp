@@ -1,4 +1,5 @@
 import type { Weekday, MonthEndRule, HolidayRule, Frequency, HolidayItem } from "@/lib/calendar";
+export type { HolidayItem };
 
 export type NotificationKind =
   | "payment_recorded"
@@ -14,9 +15,9 @@ export type NotificationKind =
 export interface BusinessSettings {
   name: string;
   licenceNo?: string;
-  phone: string;
-  email: string;
-  address: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  address?: string;
   receiptFooter?: string;
   currency: "INR";
   timezone: "Asia/Kolkata";
@@ -58,10 +59,10 @@ export const INITIAL_SETTINGS: AppSettings = {
     notifications: 1,
   },
   business: {
-    name: "THANDAL Finance",
+    name: "Thandal",
     licenceNo: "LIC-TN-2024-8849",
-    phone: "9876540000",
-    email: "contact@thandal.in",
+    contactPhone: "9876540000",
+    contactEmail: "contact@thandal.in",
     address: "No. 42, West Cross Street, Anna Nagar, Madurai, Tamil Nadu 625020",
     receiptFooter: "Thank you for prompt repayment. Retain this digital receipt for your records.",
     currency: "INR",

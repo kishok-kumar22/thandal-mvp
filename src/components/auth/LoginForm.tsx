@@ -39,7 +39,10 @@ export function LoginForm() {
   const reason = searchParams.get("reason");
 
   const [state, formAction] = useActionState(signIn, initialState);
-  const [identifier, setIdentifier] = useState(state.identifier || "");
+  const [identifier, setIdentifier] = useState(
+    state.identifier || (process.env.NODE_ENV === "development" ? "admin@thandal.in" : "")
+  );
+  const [password, setPassword] = useState("Password@123");
   const [rememberMe, setRememberMe] = useState(true);
 
   const alertRef = useRef<HTMLDivElement>(null);
@@ -59,9 +62,10 @@ export function LoginForm() {
       ? loginCopy.banners.signedOut
       : null;
 
-  // Quick fill helper for reviewers
-  const handleQuickFill = (val: string) => {
+  // Quick fill helper for reviewers (automatically fills password as well)
+  const handleQuickFill = (val: string, pwd: string = "Password@123") => {
     setIdentifier(val);
+    setPassword(pwd);
   };
 
   return (
@@ -163,15 +167,26 @@ export function LoginForm() {
               name="password"
               label={loginCopy.fields.password}
               placeholder={loginCopy.fields.passwordPlaceholder}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               error={state.fieldErrors?.password}
               required
             />
 
-            {/* Forgot password link */}
-            <div className="flex justify-end">
+            {/* Password shortcuts & Forgot password link */}
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              {process.env.NODE_ENV === "development" && (
+                <button
+                  type="button"
+                  onClick={() => setPassword("Password@123")}
+                  className="font-medium text-[#1F6BFF] hover:text-[#1549B8] hover:underline cursor-pointer"
+                >
+                  ⚡ Auto-fill password (Password@123)
+                </button>
+              )}
               <Link
                 href="/forgot-password"
-                className="text-sm font-semibold text-[#1F6BFF] hover:text-[#1549B8] hover:underline"
+                className="font-semibold text-[#1F6BFF] hover:text-[#1549B8] hover:underline ml-auto"
               >
                 {loginCopy.fields.forgotPassword}
               </Link>
@@ -230,35 +245,35 @@ export function LoginForm() {
         {/* Demo Fast Fill Helper (Dev Only) */}
         {process.env.NODE_ENV === "development" && (
           <div className="mt-6 pt-4 border-t border-dashed border-[#E6ECF5]">
-            <span className="text-[11px] font-bold text-[#8C9BB7] uppercase tracking-wider block text-center mb-2">
-              Dev Fast-Fill Identifier (Password is Password@123)
+            <span className="text-[11px] font-bold text-[#8C9BB7] uppercase tracking-wider block text-center mb-2.5">
+              Dev 1-Click Fast Fill (Auto-fills identifier & password)
             </span>
             <div className="flex flex-wrap justify-center gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickFill("admin@thandal.in")}
-                className="text-[11px] px-2 py-1 rounded bg-[#EFF6FF] text-[#1F6BFF] font-medium hover:bg-blue-100"
+                className="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#EFF6FF] text-[#1F6BFF] font-semibold hover:bg-blue-100 transition-colors cursor-pointer"
               >
                 Admin
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill("agent@thandal.in")}
-                className="text-[11px] px-2 py-1 rounded bg-slate-100 text-[#334155] font-medium hover:bg-slate-200"
+                className="text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 text-[#334155] font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Agent (Selvam)
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill("karthik@thandal.in")}
-                className="text-[11px] px-2 py-1 rounded bg-slate-100 text-[#334155] font-medium hover:bg-slate-200"
+                className="text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 text-[#334155] font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Agent (Karthik)
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickFill("9876543210")}
-                className="text-[11px] px-2 py-1 rounded bg-slate-100 text-[#334155] font-medium hover:bg-slate-200"
+                className="text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-100 text-[#334155] font-semibold hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Customer (9876543210)
               </button>

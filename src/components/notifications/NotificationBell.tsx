@@ -37,21 +37,12 @@ export function NotificationBell({ role, unreadCount = 0, isNavy = false }: Noti
       <Bell className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
 
       {unreadCount > 0 && (
-        <>
-          {/* Mobile indicator: red dot (<768px) */}
-          <span
-            className="md:hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#E5252A] rounded-full ring-2 ring-white"
-            aria-hidden="true"
-          />
-
-          {/* Tablet/Desktop badge: count pill (>=768px) */}
-          <span
-            className="hidden md:inline-flex absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#E5252A] text-white text-[10px] font-bold items-center justify-center rounded-full ring-2 ring-white"
-            aria-hidden="true"
-          >
-            {badgeText}
-          </span>
-        </>
+        <span
+          className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#E5252A] text-white text-[10px] font-bold inline-flex items-center justify-center rounded-full ring-2 ring-white"
+          aria-hidden="true"
+        >
+          {badgeText}
+        </span>
       )}
     </Link>
   );

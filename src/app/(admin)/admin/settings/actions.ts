@@ -5,6 +5,7 @@ import { can } from "@/lib/permissions";
 import {
   updateSettings as coreUpdateSettings,
   type SettingsSection,
+  type SettingsPatches,
 } from "@/lib/settings";
 import type {
   AppSettings,
@@ -15,9 +16,11 @@ import type {
 } from "@/data/mockSettings";
 
 export async function updateSettings(params: {
-  section: SettingsSection;
-  values: Partial<BusinessSettings | LoanDefaultSettings | CalendarSettingsModel | NotificationSettings>;
-  version: number;
+  patches?: SettingsPatches;
+  versions?: Partial<Record<SettingsSection, number>>;
+  section?: SettingsSection;
+  values?: Partial<BusinessSettings | LoanDefaultSettings | CalendarSettingsModel | NotificationSettings>;
+  version?: number;
 }): Promise<{ success: boolean; settings?: AppSettings; error?: string }> {
   const user = await getCurrentUser();
   if (!user || !can(user, "manage_settings")) {

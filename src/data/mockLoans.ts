@@ -16,6 +16,7 @@ export interface LoanItem {
   instalment: number; // 105
   disbursedOn: string; // "21 Oct 2026"
   firstDueDate: string; // "21 Oct 2026"
+  collectFirstAtDisbursement?: boolean;
   penaltyPolicy?: PenaltyPolicy;
   scheduleDates?: string[];
 }
@@ -24,7 +25,7 @@ export const mockLoansList: LoanItem[] = [
   {
     id: "LN-1052",
     customerId: "C-001",
-    customerName: "R.Kumar",
+    customerName: "R. Kumar",
     principal: 5000,
     interest: 250,
     remaining: 5145,
@@ -46,7 +47,7 @@ export const mockLoansList: LoanItem[] = [
   {
     id: "LN-1053",
     customerId: "C-002",
-    customerName: "S.Priya",
+    customerName: "S. Priya",
     principal: 10000,
     interest: 500,
     remaining: 8400,
@@ -68,7 +69,7 @@ export const mockLoansList: LoanItem[] = [
   {
     id: "LN-1054",
     customerId: "C-003",
-    customerName: "M.Arjun",
+    customerName: "M. Arjun",
     principal: 6000,
     interest: 300,
     remaining: 4200,

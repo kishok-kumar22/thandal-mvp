@@ -10,6 +10,8 @@ interface PageProps {
   }>;
 }
 
+export const instant = false;
+
 export default async function AgentCustomersPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const q = (resolvedParams.q || "").trim().toLowerCase();

@@ -6,7 +6,7 @@ import { MessageSquareOff, Eye } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/Button";
 import { SupportRequestModal } from "./SupportRequestModal";
-import type { SupportRequest, SupportStatus } from "@/data/mockSupport";
+import type { SupportRequest, SupportStatus, SupportKind } from "@/data/mockSupport";
 
 interface SupportInboxTableProps {
   initialRequests: SupportRequest[];
@@ -15,11 +15,16 @@ interface SupportInboxTableProps {
 export function SupportInboxTable({ initialRequests }: SupportInboxTableProps) {
   const [requests, setRequests] = useState<SupportRequest[]>(initialRequests);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedKind, setSelectedKind] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<SupportRequest | null>(null);
 
   const filtered = requests.filter((r) => {
     if (selectedStatus !== "all" && r.status !== selectedStatus) {
+      return false;
+    }
+    const reqKind = r.kind || "general";
+    if (selectedKind !== "all" && reqKind !== selectedKind) {
       return false;
     }
     return true;
@@ -60,6 +65,31 @@ export function SupportInboxTable({ initialRequests }: SupportInboxTableProps) {
     }
   };
 
+  const getKindBadge = (kind?: SupportKind) => {
+    const k = kind || "general";
+    switch (k) {
+      case "callback":
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+            Call back
+          </span>
+        );
+      case "profile_correction":
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60">
+            Profile correction
+          </span>
+        );
+      case "general":
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
+            General
+          </span>
+        );
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Detail Modal */}
@@ -70,26 +100,50 @@ export function SupportInboxTable({ initialRequests }: SupportInboxTableProps) {
         onStatusUpdated={handleStatusUpdated}
       />
 
-      {/* Filter Row */}
+      {/* Filter Row: Status + Type */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <label htmlFor="support-status-filter" className="text-xs font-semibold text-[#64748B]">
-            Status:
-          </label>
-          <select
-            id="support-status-filter"
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="h-10 px-3 text-sm rounded-lg border border-[#D9E1EC] bg-white text-[#0B1B3F] font-semibold cursor-pointer"
-          >
-            <option value="all">All statuses</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In progress</option>
-            <option value="resolved">Resolved</option>
-          </select>
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="support-status-filter" className="text-xs font-semibold text-[#64748B]">
+              Status:
+            </label>
+            <select
+              id="support-status-filter"
+              value={selectedStatus}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-10 px-3 text-sm rounded-lg border border-[#D9E1EC] bg-white text-[#0B1B3F] font-semibold cursor-pointer"
+            >
+              <option value="all">All statuses</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In progress</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+
+          {/* Type Filter */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="support-type-filter" className="text-xs font-semibold text-[#64748B]">
+              Type:
+            </label>
+            <select
+              id="support-type-filter"
+              value={selectedKind}
+              onChange={(e) => {
+                setSelectedKind(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-10 px-3 text-sm rounded-lg border border-[#D9E1EC] bg-white text-[#0B1B3F] font-semibold cursor-pointer"
+            >
+              <option value="all">All types</option>
+              <option value="general">General</option>
+              <option value="callback">Call back</option>
+              <option value="profile_correction">Profile correction</option>
+            </select>
+          </div>
         </div>
 
         <span className="text-xs text-[#64748B] font-medium">
@@ -118,6 +172,9 @@ export function SupportInboxTable({ initialRequests }: SupportInboxTableProps) {
                     SR ID
                   </th>
                   <th scope="col" className="py-3.5 px-4">
+                    Type
+                  </th>
+                  <th scope="col" className="py-3.5 px-4">
                     Customer
                   </th>
                   <th scope="col" className="py-3.5 px-4">
@@ -142,6 +199,9 @@ export function SupportInboxTable({ initialRequests }: SupportInboxTableProps) {
                   <tr key={req.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3.5 px-4 font-mono font-bold text-[#1F6BFF] whitespace-nowrap">
                       {req.id}
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      {getKindBadge(req.kind)}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <Link

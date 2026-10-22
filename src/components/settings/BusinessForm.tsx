@@ -42,12 +42,12 @@ export function BusinessForm({ initialBusiness, version: initialVersion }: Busin
       newErrors.licenceNo = "Licence number must be between 4 and 30 characters.";
     }
 
-    const cleanPhone = business.phone.replace(/\D/g, "");
-    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+    const cleanPhone = (business.contactPhone || "").replace(/\D/g, "");
+    if (business.contactPhone && !/^[6-9]\d{9}$/.test(cleanPhone)) {
       newErrors.phone = "Enter a valid 10-digit Indian contact phone number.";
     }
 
-    if (!business.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(business.email)) {
+    if (business.contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(business.contactEmail)) {
       newErrors.email = "Enter a valid email address.";
     }
 
@@ -163,8 +163,8 @@ export function BusinessForm({ initialBusiness, version: initialVersion }: Busin
             <input
               id="biz-phone"
               type="tel"
-              value={business.phone}
-              onChange={(e) => setBusiness((prev) => ({ ...prev, phone: e.target.value }))}
+              value={business.contactPhone || ""}
+              onChange={(e) => setBusiness((prev) => ({ ...prev, contactPhone: e.target.value }))}
               aria-invalid={Boolean(errors.phone)}
               aria-describedby={errors.phone ? "biz-phone-error" : undefined}
               className={`w-full h-12 px-4 text-base rounded-lg border bg-white text-[#0B1B3F] focus:outline-none focus:ring-2 focus:ring-[#1F6BFF]/20 focus:border-[#1F6BFF] ${
@@ -186,8 +186,8 @@ export function BusinessForm({ initialBusiness, version: initialVersion }: Busin
             <input
               id="biz-email"
               type="email"
-              value={business.email}
-              onChange={(e) => setBusiness((prev) => ({ ...prev, email: e.target.value }))}
+              value={business.contactEmail || ""}
+              onChange={(e) => setBusiness((prev) => ({ ...prev, contactEmail: e.target.value }))}
               aria-invalid={Boolean(errors.email)}
               aria-describedby={errors.email ? "biz-email-error" : undefined}
               className={`w-full h-12 px-4 text-base rounded-lg border bg-white text-[#0B1B3F] focus:outline-none focus:ring-2 focus:ring-[#1F6BFF]/20 focus:border-[#1F6BFF] ${

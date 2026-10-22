@@ -7,6 +7,7 @@ import { Search, ArrowLeft } from "lucide-react";
 import type { Role } from "@/config/navigation";
 import { CubeLogo } from "./Sidebar";
 import { UserMenu } from "./UserMenu";
+import { TopbarSearch } from "./TopbarSearch";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { type SessionUser, DEMO_USERS } from "@/config/auth";
 import { getUnreadCount } from "@/lib/notifications";
@@ -60,6 +61,22 @@ export function Topbar({
         (role === "agent" && pathname?.startsWith("/agent")) ||
         role === "customer"));
 
+  const isCustomerProfile = pathname === "/customer/profile";
+  const isCustomerSubPage =
+    pathname?.startsWith("/customer/profile/") || pathname === "/customer/contact-agent";
+  const shouldShowBack =
+    showBack ||
+    pathname?.startsWith("/agent/cash-handover") ||
+    isCustomerProfile ||
+    isCustomerSubPage;
+  const resolvedBackHref =
+    backHref ||
+    (isCustomerSubPage
+      ? "/customer/profile"
+      : isCustomerProfile
+      ? "/customer/home"
+      : "/agent/my-day");
+
   return (
     <header
       className={`sticky top-0 z-30 h-16 px-4 sm:px-6 flex items-center justify-between gap-4 transition-colors ${
@@ -70,9 +87,9 @@ export function Topbar({
     >
       {/* Left section: Logo (mobile) + search or back */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-xl">
-        {(showBack || pathname?.startsWith("/agent/cash-handover")) && (
+        {shouldShowBack && (
           <Link
-            href={backHref || "/agent/my-day"}
+            href={resolvedBackHref}
             className={`p-1.5 rounded-lg transition-colors cursor-pointer mr-1 ${
               isNavy
                 ? "text-white/80 hover:text-white hover:bg-white/10"
@@ -103,29 +120,8 @@ export function Topbar({
           </button>
         </div>
 
-        {/* Search Bar (Hidden on mobile, visible from sm up) */}
-        <div className="hidden sm:flex items-center flex-1 max-w-md relative">
-          <Search
-            className={`w-4 h-4 absolute left-3.5 pointer-events-none ${
-              isNavy ? "text-white/50" : "text-slate-400"
-            }`}
-          />
-          <input
-            type="text"
-            placeholder={
-              role === "customer"
-                ? "Search your loans, receipts..."
-                : role === "agent"
-                ? "Search my customers or loans..."
-                : "Search customers, loans, or collections..."
-            }
-            className={`w-full h-10 pl-10 pr-4 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#1F6BFF] ${
-              isNavy
-                ? "bg-[#13264F]/60 text-white placeholder-white/40 border border-white/10 focus:bg-[#13264F]"
-                : "bg-[#F8FAFC] text-slate-800 placeholder-slate-400 border border-[#E2E8F0] focus:bg-white"
-            }`}
-          />
-        </div>
+        {/* Role-aware Search Bar (Hidden on mobile, visible from sm up) */}
+        <TopbarSearch role={role} isNavy={isNavy} />
       </div>
 
       {/* Right section: Notification Bell + UserMenu */}

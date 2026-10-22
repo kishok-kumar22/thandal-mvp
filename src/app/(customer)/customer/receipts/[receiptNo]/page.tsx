@@ -1,8 +1,8 @@
-import React from "react";
-import { notFound } from "next/navigation";
+import React, { Suspense } from "react";
 import { requireRole } from "@/lib/session";
-import { mockReceiptsList } from "@/data/mockReceipts";
+import { getMyReceipt } from "@/lib/customerPortal";
 import { ReceiptView } from "@/components/receipts/ReceiptView";
+import { AutoPrint } from "@/components/ui/AutoPrint";
 
 interface CustomerReceiptDetailPageProps {
   params: Promise<{
@@ -18,22 +18,20 @@ export const metadata = {
 export default async function CustomerReceiptDetailPage(props: CustomerReceiptDetailPageProps) {
   const { receiptNo } = await props.params;
   const user = await requireRole("customer", `/customer/receipts/${receiptNo}`);
-  const customerId = user.customerId || "C-001";
 
-  const receipt = mockReceiptsList.find(
-    (r) => r.receiptNo.toUpperCase() === receiptNo.toUpperCase()
-  );
-
-  // Security isolation: Customers can strictly only view their own receipts
-  if (!receipt || receipt.customerId !== customerId) {
-    notFound();
-  }
+  // Calls customer data layer security boundary: validates ownership & returns sanitized view model or notFound()
+  const receipt = await getMyReceipt(user, receiptNo);
 
   return (
-    <ReceiptView
-      receipt={receipt}
-      role="customer"
-      backHref="/customer/receipts"
-    />
+    <>
+      <Suspense fallback={null}>
+        <AutoPrint />
+      </Suspense>
+      <ReceiptView
+        receipt={receipt as any}
+        role="customer"
+        backHref="/customer/receipts"
+      />
+    </>
   );
 }

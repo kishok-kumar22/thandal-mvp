@@ -127,6 +127,19 @@ export function can(
     return user.role === "customer";
   }
 
+  // Account-level self-management capabilities (any role, own account)
+  if (action === "change_own_password" || action === "update_own_preferences") {
+    if (!user) return false;
+    if (!resource) return true;
+    if (resource.customerId && user.customerId) {
+      return resource.customerId === user.customerId;
+    }
+    if (resource.agentId && user.agentId) {
+      return resource.agentId === user.agentId;
+    }
+    return true;
+  }
+
   // Admins always have full permissions
   if (user.role === "admin") {
     return true;

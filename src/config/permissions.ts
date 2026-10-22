@@ -17,7 +17,9 @@ export type AdminCapability =
 
 export type SpecialCapability =
   | AdminCapability
-  | "submit_support_request";
+  | "submit_support_request"
+  | "change_own_password"
+  | "update_own_preferences";
 
 export interface PermissionCell {
   value: PermissionValue;

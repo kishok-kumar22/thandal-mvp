@@ -11,8 +11,115 @@ import type { SessionUser } from "./session";
 
 let notificationSeq = 10;
 
+export type CustomerEventKind =
+  | "payment_recorded"
+  | "instalment_upcoming"
+  | "instalment_overdue"
+  | "support_request_updated";
+
+export const CUSTOMER_EVENTS: CustomerEventKind[] = [
+  "payment_recorded",
+  "instalment_upcoming",
+  "instalment_overdue",
+  "support_request_updated",
+];
+
+export interface UserPreferences {
+  notifications: Partial<Record<CustomerEventKind, boolean>>;
+  version: number;
+}
+
+// In-memory user preferences store
+export const userPrefsStore: Record<string, UserPreferences> = {
+  "U-003": {
+    notifications: {
+      payment_recorded: true,
+      instalment_upcoming: true,
+      instalment_overdue: true,
+      support_request_updated: true,
+    },
+    version: 1,
+  },
+  "C-001": {
+    notifications: {
+      payment_recorded: true,
+      instalment_upcoming: true,
+      instalment_overdue: true,
+      support_request_updated: true,
+    },
+    version: 1,
+  },
+};
+
+export function getUserPreferences(userId: string): UserPreferences {
+  if (!userPrefsStore[userId]) {
+    userPrefsStore[userId] = {
+      notifications: {
+        payment_recorded: true,
+        instalment_upcoming: true,
+        instalment_overdue: true,
+        support_request_updated: true,
+      },
+      version: 1,
+    };
+  }
+  return JSON.parse(JSON.stringify(userPrefsStore[userId]));
+}
+
+export function updateUserPreferences(
+  userId: string,
+  prefs: Partial<Record<CustomerEventKind, boolean>>,
+  version: number
+): { success: boolean; preferences?: UserPreferences; error?: string } {
+  const current = getUserPreferences(userId);
+  if (version !== current.version) {
+    return {
+      success: false,
+      error: "Preferences changed elsewhere. Refreshing.",
+      preferences: current,
+    };
+  }
+
+  userPrefsStore[userId] = {
+    notifications: {
+      ...current.notifications,
+      ...prefs,
+    },
+    version: current.version + 1,
+  };
+
+  return {
+    success: true,
+    preferences: JSON.parse(JSON.stringify(userPrefsStore[userId])),
+  };
+}
+
 /**
- * Creates and stores an in-app notification IF the corresponding event setting is enabled.
+ * Checks whether an in-app notification should fire:
+ * Requires BOTH organization-level enablement AND individual user preference (default true).
+ */
+export function isNotificationEnabled(kind: NotificationKind, userId?: string): boolean {
+  // 1. Check organization master switch
+  const eventConfig = currentAppSettings.notifications.events[kind];
+  if (!eventConfig || !eventConfig.inApp) {
+    return false;
+  }
+
+  // 2. Check user-level preference if applicable
+  if (userId && (CUSTOMER_EVENTS as string[]).includes(kind)) {
+    const prefs = getUserPreferences(userId);
+    const userVal = prefs.notifications[kind as CustomerEventKind];
+    if (userVal === false) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Creates and stores an in-app notification IF the corresponding event setting is enabled
+ * at both organisation and user levels.
  * Contents use strictly template strings (IDs, amounts, first names only).
  */
 export function notify(params: {
@@ -24,9 +131,7 @@ export function notify(params: {
   occursOn?: string;
   href?: string;
 }): AppNotification | null {
-  // Check if in-app notification is enabled for this kind
-  const eventConfig = currentAppSettings.notifications.events[params.kind];
-  if (!eventConfig || !eventConfig.inApp) {
+  if (!isNotificationEnabled(params.kind, params.userId)) {
     return null;
   }
 
@@ -97,27 +202,31 @@ export function getReminders(
       const deterministicId = `rem-${loan.id}-${item.instalmentNumber}`;
 
       if (dueIso > currentDateIso && dueIso <= maxUpcomingIso) {
-        reminders.push({
-          id: deterministicId,
-          userId: customerId,
-          kind: "instalment_upcoming",
-          severity: "warning",
-          title: `Upcoming instalment ₹${item.amount} due`,
-          occursOn: dueIso,
-          createdAt: `${dueIso}T08:00:00+05:30`,
-          href: "/customer/schedule",
-        });
+        if (isNotificationEnabled("instalment_upcoming", customerId)) {
+          reminders.push({
+            id: deterministicId,
+            userId: customerId,
+            kind: "instalment_upcoming",
+            severity: "warning",
+            title: `Upcoming instalment ₹${item.amount} due`,
+            occursOn: dueIso,
+            createdAt: `${dueIso}T08:00:00+05:30`,
+            href: "/customer/schedule",
+          });
+        }
       } else if (dueIso < currentDateIso) {
-        reminders.push({
-          id: deterministicId,
-          userId: customerId,
-          kind: "instalment_overdue",
-          severity: "danger",
-          title: `Instalment overdue ₹${item.amount}`,
-          occursOn: dueIso,
-          createdAt: `${dueIso}T08:00:00+05:30`,
-          href: "/customer/schedule",
-        });
+        if (isNotificationEnabled("instalment_overdue", customerId)) {
+          reminders.push({
+            id: deterministicId,
+            userId: customerId,
+            kind: "instalment_overdue",
+            severity: "danger",
+            title: `Instalment overdue ₹${item.amount}`,
+            occursOn: dueIso,
+            createdAt: `${dueIso}T08:00:00+05:30`,
+            href: "/customer/schedule",
+          });
+        }
       }
     }
   }

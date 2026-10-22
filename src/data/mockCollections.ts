@@ -21,7 +21,7 @@ export const mockCollectionTasks: CollectionTask[] = [
   {
     id: "TASK-001",
     customerId: "C-001",
-    customerName: "R.Kumar",
+    customerName: "R. Kumar",
     loanId: "LN-1052",
     agentId: "A-001",
     agentName: "Selvam",
@@ -37,7 +37,7 @@ export const mockCollectionTasks: CollectionTask[] = [
   {
     id: "TASK-002",
     customerId: "C-002",
-    customerName: "S.Priya",
+    customerName: "S. Priya",
     loanId: "LN-1053",
     agentId: "A-001",
     agentName: "Selvam",
@@ -55,7 +55,7 @@ export const mockCollectionTasks: CollectionTask[] = [
   {
     id: "TASK-003",
     customerId: "C-003",
-    customerName: "M.Arjun",
+    customerName: "M. Arjun",
     loanId: "LN-1054",
     agentId: "A-001",
     agentName: "Selvam",

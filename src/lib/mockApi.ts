@@ -25,12 +25,15 @@ import { notify } from "./notifications";
 import { buildDueDates } from "./calendar";
 import { currentAppSettings } from "@/data/mockSettings";
 import { todayIso } from "./clock";
+import { ALLOW_MULTIPLE_ACTIVE_LOANS } from "@/config/loanRules";
 import {
   mockSupportRequests,
   getNextSupportRequestId,
   type SupportRequest,
   type SupportStatus,
   type SupportAttachmentMeta,
+  type SupportKind,
+  type SupportMeta,
 } from "@/data/mockSupport";
 
 const supportRateLimit = new Map<string, number[]>();
@@ -626,8 +629,17 @@ export async function confirmDisbursement(
     return { success: false, loanId: "" };
   }
 
+  if (!ALLOW_MULTIPLE_ACTIVE_LOANS) {
+    const hasActiveOrOverdue = mockLoansList.some(
+      (l) => l.customerId === draft.customerId && (l.status === "active" || l.status === "overdue")
+    );
+    if (hasActiveOrOverdue) {
+      return { success: false, loanId: "" };
+    }
+  }
+
   const customer = mockCustomersList.find((c) => c.id === draft.customerId);
-  const customerName = customer ? customer.name.replace(/\s+/g, "") : "Customer";
+  const customerName = customer ? customer.name : "Customer";
 
   const calc = calculateLoan({
     principal: draft.principal,
@@ -841,12 +853,15 @@ export async function updatePenaltyPolicy(): Promise<{ success: boolean }> {
 // ----------------------------------------------------------------------------
 
 export interface SubmitSupportRequestParams {
-  idempotencyKey: string;
+  idempotencyKey?: string;
   loanId?: string;
-  subject: string;
-  message: string;
+  kind?: SupportKind;
+  meta?: SupportMeta;
+  subject?: string;
+  message?: string;
   attachmentMeta?: SupportAttachmentMeta;
 }
+
 
 /**
  * Submits a new support request from an authenticated customer.
@@ -856,7 +871,7 @@ export interface SubmitSupportRequestParams {
 export async function submitSupportRequest(
   params: SubmitSupportRequestParams
 ): Promise<{ success: boolean; request?: SupportRequest; error?: string }> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   const user = await getCurrentUser();
   if (!user) {
@@ -882,16 +897,32 @@ export async function submitSupportRequest(
     }
   }
 
-  // Field validations
-  const subject = (params.subject || "").trim();
-  const message = (params.message || "").trim();
+  const kind: SupportKind = params.kind || "general";
+  let resolvedSubject = (params.subject || "").trim();
+  let resolvedMessage = (params.message || "").trim();
 
-  if (!subject || subject.length < 3 || subject.length > 100) {
-    return { success: false, error: "Subject must be between 3 and 100 characters." };
-  }
-
-  if (!message || message.length < 10 || message.length > 1000) {
-    return { success: false, error: "Message must be between 10 and 1000 characters." };
+  if (kind === "callback") {
+    resolvedSubject = "Call back request";
+    if (!resolvedMessage) {
+      resolvedMessage = params.meta?.preferredTime
+        ? `Preferred time: ${params.meta.preferredTime}`
+        : "Call back requested";
+    }
+  } else if (kind === "profile_correction") {
+    const fieldName = params.meta?.field || "details";
+    const fieldLabel = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+    resolvedSubject = `Profile correction: ${fieldLabel}`;
+    if (!resolvedMessage || resolvedMessage.length < 10 || resolvedMessage.length > 500) {
+      return { success: false, error: "Correct details must be between 10 and 500 characters." };
+    }
+  } else {
+    // General request validation
+    if (!resolvedSubject || resolvedSubject.length < 3 || resolvedSubject.length > 100) {
+      return { success: false, error: "Subject must be between 3 and 100 characters." };
+    }
+    if (!resolvedMessage || resolvedMessage.length < 10 || resolvedMessage.length > 1000) {
+      return { success: false, error: "Message must be between 10 and 1000 characters." };
+    }
   }
 
   // Attachment validation
@@ -924,8 +955,10 @@ export async function submitSupportRequest(
     customerId,
     customerName: user.name,
     loanId: params.loanId && params.loanId !== "none" ? params.loanId : undefined,
-    subject,
-    message,
+    kind,
+    meta: params.meta,
+    subject: resolvedSubject,
+    message: resolvedMessage,
     attachment: params.attachmentMeta,
     status: "open",
     createdAt: new Date().toISOString(),
@@ -936,12 +969,17 @@ export async function submitSupportRequest(
     supportIdempotency.set(params.idempotencyKey, newRequest);
   }
 
-  // Append privacy-compliant audit log entry (ID only, NEVER message content or subject)
+  // Append privacy-compliant audit log entry (ID and kind only, NEVER message content or subject)
+  const auditDetail =
+    kind === "general"
+      ? `Support request ${reqId} created`
+      : `Support request ${reqId} created (${kind})`;
+
   appendAudit({
     action: "support_request_created",
     entityType: "support",
     entityId: reqId,
-    details: `Support request ${reqId} created`,
+    details: auditDetail,
     actorOverride: user,
   });
 

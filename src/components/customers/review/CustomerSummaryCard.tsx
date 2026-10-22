@@ -14,7 +14,7 @@ export function CustomerSummaryCard({ customer, customerId }: CustomerSummaryCar
   const details = [
     { label: "Full name", value: customer.name },
     { label: "Customer ID", value: customerId },
-    { label: "Mobile number", value: maskMobile(customer.mobile) },
+    { label: "Mobile number", value: maskMobile(customer.mobile, "portal") },
     { label: "Current address", value: customer.currentAddress, multiline: true },
     { label: "Permanent address", value: customer.permanentAddress },
     { label: "Assigned agent", value: customer.assignedAgent },

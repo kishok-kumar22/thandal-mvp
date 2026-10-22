@@ -86,7 +86,7 @@ export function splitPercentages(values: number[]): number[] {
   });
 
   const allocatedSum = components.reduce((acc, c) => acc + c.floor, 0);
-  let remainderToDistribute = TARGET_SUM - allocatedSum;
+  const remainderToDistribute = TARGET_SUM - allocatedSum;
 
   // Sort descending by remainder to distribute remaining units
   components.sort((a, b) => b.remainder - a.remainder);
@@ -99,5 +99,44 @@ export function splitPercentages(values: number[]): number[] {
   components.sort((a, b) => a.index - b.index);
 
   return components.map((c) => Number((c.floor / 100).toFixed(2)));
+}
+
+/**
+ * Normalises an identifier or reference code to canonical hyphenated uppercase format.
+ * Examples: "rc0001" -> "RC-0001", "LN1052" -> "LN-1052", "c001" -> "C-001"
+ */
+export function normaliseRef(input: string | null | undefined): string {
+  if (!input) return "";
+  const cleaned = input.trim().toUpperCase();
+  return cleaned.replace(/^([A-Z]+)[-\s]?(\d+)$/, "$1-$2");
+}
+
+/**
+ * Generates uppercase initials from a person's display name.
+ * Example: "R. Kumar" -> "RK", "Selvam" -> "S", "" -> "?"
+ */
+export function initials(name: string | null | undefined): string {
+  if (!name) return "?";
+  const cleaned = name.trim();
+  if (!cleaned) return "?";
+
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "?";
+
+  if (words.length === 1) {
+    const letters = words[0].replace(/[^a-zA-Z0-9]/g, "");
+    return letters.charAt(0).toUpperCase() || "?";
+  }
+
+  const firstWordLetters = words[0].replace(/[^a-zA-Z0-9]/g, "");
+  const lastWordLetters = words[words.length - 1].replace(/[^a-zA-Z0-9]/g, "");
+
+  const firstChar = firstWordLetters.charAt(0).toUpperCase();
+  const lastChar = lastWordLetters.charAt(0).toUpperCase();
+
+  if (firstChar && lastChar) {
+    return `${firstChar}${lastChar}`;
+  }
+  return firstChar || lastChar || "?";
 }
 

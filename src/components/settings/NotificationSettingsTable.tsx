@@ -244,7 +244,7 @@ export function NotificationSettingsTable({
       </div>
 
       <InfoPanel>
-        In-app notifications appear instantly in the recipient bell menu and customer support center. SMS and Email gateways can be connected in production.
+        Customers can also switch individual events off from their own profile.
       </InfoPanel>
 
       {/* Footer bar */}

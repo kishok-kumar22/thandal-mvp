@@ -21,7 +21,9 @@ export type AuditAction =
   | "account_locked"
   | "settings_updated"
   | "support_request_created"
-  | "support_request_updated";
+  | "support_request_updated"
+  | "statement_downloaded"
+  | "password_changed";
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   payment_recorded: "Payment recorded",
@@ -45,6 +47,8 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   settings_updated: "Settings updated",
   support_request_created: "Support request created",
   support_request_updated: "Support request updated",
+  statement_downloaded: "Statement downloaded",
+  password_changed: "Password changed",
 };
 
 export interface AuditEntry {

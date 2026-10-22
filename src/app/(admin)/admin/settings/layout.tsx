@@ -9,6 +9,8 @@ export const metadata = {
   description: "Configure your business, loan defaults, collection calendar and more.",
 };
 
+export const instant = false;
+
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -28,10 +30,10 @@ export default async function SettingsLayout({ children }: SettingsLayoutProps) 
     );
   }
 
+  // NOTE: The mockup shows no tab row; we keep the tabs anyway so Roles, Notifications and Audit log stay reachable.
   const tabs = [
-    { label: "Business", href: "/admin/settings/business" },
-    { label: "Loan defaults", href: "/admin/settings/loan-defaults" },
-    { label: "Collection calendar", href: "/admin/settings/collection-calendar" },
+    { label: "General", href: "/admin/settings" },
+    { label: "Collection days & holidays", href: "/admin/settings/holidays" },
     { label: "Roles", href: "/admin/settings/roles" },
     { label: "Notifications", href: "/admin/settings/notifications" },
     { label: "Audit log", href: "/admin/settings/audit-log" },
@@ -39,22 +41,12 @@ export default async function SettingsLayout({ children }: SettingsLayoutProps) 
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-24 md:pb-12">
-      {/* Settings Header */}
-      <div>
-        <h1 className="text-3xl sm:text-[40px] font-bold text-[#0B1B3F] tracking-tight">
-          Settings
-        </h1>
-        <p className="text-sm sm:text-base text-[#64748B] mt-1.5 font-normal">
-          Configure your business, loan defaults, collection calendar and more.
-        </p>
-      </div>
-
       {/* Tabs with hairline vertical dividers */}
       <div>
         <PageTabs tabs={tabs} variant="settings" />
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content (each page renders its own SettingsHeader with H1) */}
       <div>{children}</div>
     </div>
   );

@@ -69,21 +69,21 @@ export const mockDashboardData: DashboardData = {
     items: [
       {
         id: "1",
-        customer: "R.Kumar",
+        customer: "R. Kumar",
         loanId: "LN-1052",
         dueAmount: 105,
         status: "Pending",
       },
       {
         id: "2",
-        customer: "S.Priya",
+        customer: "S. Priya",
         loanId: "LN-1053",
         dueAmount: 150,
         status: "Paid",
       },
       {
         id: "3",
-        customer: "M.Arjun",
+        customer: "M. Arjun",
         loanId: "LN-1054",
         dueAmount: 210,
         status: "Overdue",

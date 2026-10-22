@@ -6,7 +6,7 @@
  */
 export function maskMobile(
   mobile: string,
-  format: "agent" | "list" | "profile" | "stars" | "x" = "stars"
+  format: "agent" | "list" | "profile" | "stars" | "x" | "portal" = "stars"
 ): string {
   if (!mobile) return "";
   const cleaned = mobile.replace(/\D/g, "");
@@ -19,7 +19,7 @@ export function maskMobile(
     if (format === "agent") {
       return `+91 ${p1}XXX ${p4}`;
     }
-    if (format === "profile" || format === "x") {
+    if (format === "profile" || format === "x" || format === "portal") {
       return `+91 ${p1}XXX XX${p3}`;
     }
     // "list" or "stars"

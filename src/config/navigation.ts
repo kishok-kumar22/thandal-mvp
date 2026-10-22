@@ -217,7 +217,7 @@ export const navigationConfig: Record<Role, RoleNavigationConfig> = {
     portalTitle: "Customer Portal",
     sections: [
       {
-        title: "MY ACCOUNT",
+        title: "",
         items: [
           {
             label: "Home",
@@ -245,32 +245,12 @@ export const navigationConfig: Record<Role, RoleNavigationConfig> = {
             icon: Receipt,
           },
           {
-            label: "Documents",
-            href: "/customer/documents",
-            icon: Folder,
-          },
-        ],
-      },
-      {
-        title: "SUPPORT",
-        items: [
-          {
-            label: "Notifications",
-            href: "/customer/notifications",
-            icon: Bell,
-          },
-          {
-            label: "Contact agent",
-            href: "/customer/contact",
-            icon: Phone,
-          },
-          {
-            label: "Help & support",
+            label: "Support",
             href: "/customer/support",
             icon: HelpCircle,
           },
           {
-            label: "My profile",
+            label: "Profile",
             href: "/customer/profile",
             icon: User,
           },

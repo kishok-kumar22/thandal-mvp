@@ -2,7 +2,7 @@
 
 import React from "react";
 import { MessageSquareOff } from "lucide-react";
-import type { SupportRequest } from "@/data/mockSupport";
+import type { SupportRequest, SupportKind } from "@/data/mockSupport";
 
 interface MyRequestsListProps {
   requests: SupportRequest[];
@@ -31,6 +31,18 @@ export function MyRequestsList({ requests }: MyRequestsListProps) {
         );
       default:
         return null;
+    }
+  };
+
+  const getKindText = (kind?: SupportKind) => {
+    switch (kind) {
+      case "callback":
+        return "Call back";
+      case "profile_correction":
+        return "Profile correction";
+      case "general":
+      default:
+        return "General";
     }
   };
 
@@ -67,6 +79,9 @@ export function MyRequestsList({ requests }: MyRequestsListProps) {
                     Request ID
                   </th>
                   <th scope="col" className="py-3 px-4">
+                    Type
+                  </th>
+                  <th scope="col" className="py-3 px-4">
                     Subject
                   </th>
                   <th scope="col" className="py-3 px-4">
@@ -82,6 +97,9 @@ export function MyRequestsList({ requests }: MyRequestsListProps) {
                   <tr key={req.id} className="hover:bg-slate-50 transition-colors">
                     <td className="py-3 px-4 font-mono font-bold text-[#1F6BFF] whitespace-nowrap">
                       {req.id}
+                    </td>
+                    <td className="py-3 px-4 text-xs font-semibold text-[#64748B] whitespace-nowrap">
+                      {getKindText(req.kind)}
                     </td>
                     <td className="py-3 px-4 text-[#0B1B3F] font-medium max-w-[200px] truncate">
                       {req.subject}
@@ -106,9 +124,14 @@ export function MyRequestsList({ requests }: MyRequestsListProps) {
                 className="p-4 rounded-xl border border-[#E6ECF5] bg-slate-50 space-y-2"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-sm text-[#1F6BFF]">
-                    {req.id}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-sm text-[#1F6BFF]">
+                      {req.id}
+                    </span>
+                    <span className="text-xs font-medium text-[#64748B]">
+                      • {getKindText(req.kind)}
+                    </span>
+                  </div>
                   {getStatusBadge(req.status)}
                 </div>
                 <p className="text-sm font-semibold text-[#0B1B3F] truncate">

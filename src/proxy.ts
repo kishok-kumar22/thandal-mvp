@@ -3,17 +3,17 @@ import type { NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME } from "@/config/auth";
 
 /**
- * Lightweight edge middleware for basic routing guards.
+ * Lightweight edge proxy for basic routing guards.
  * 
  * IMPORTANT ARCHITECTURAL & SECURITY NOTE:
- * This middleware ONLY performs a coarse existence check for the `thandal_session` cookie
+ * This proxy ONLY performs a coarse existence check for the `thandal_session` cookie
  * to prevent unnecessary rendering of protected layouts when unauthenticated.
  * 
  * The AUTHORITATIVE and cryptographically verified access control is enforced on the server
  * by `requireRole()`, `requireUser()`, and permission capabilities `can()`.
- * Never rely on this middleware alone for security enforcement.
+ * Never rely on this proxy alone for security enforcement.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect admin, agent, and customer application paths

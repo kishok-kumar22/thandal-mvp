@@ -91,7 +91,7 @@ export function ReceiptView({ receipt, role = "admin", backHref }: ReceiptViewPr
       <ReceiptCard receipt={receipt} />
 
       {/* Action Buttons */}
-      <ReceiptActions receipt={receipt} role={role === "customer" ? "agent" : role} />
+      <ReceiptActions receipt={receipt} role={role} backHref={resolvedBackHref} />
     </div>
   );
 }

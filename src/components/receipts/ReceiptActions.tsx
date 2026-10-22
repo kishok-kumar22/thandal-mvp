@@ -9,11 +9,16 @@ import type { Receipt } from "@/data/mockReceipts";
 import { formatINR } from "@/lib/format";
 
 interface ReceiptActionsProps {
-  receipt: Receipt;
-  role?: "admin" | "agent";
+  receipt: {
+    receiptNo: string;
+    amount: number;
+    paidAt: string;
+  };
+  role?: "admin" | "agent" | "customer";
+  backHref?: string;
 }
 
-export function ReceiptActions({ receipt, role = "admin" }: ReceiptActionsProps) {
+export function ReceiptActions({ receipt, role = "admin", backHref: customBackHref }: ReceiptActionsProps) {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
@@ -62,7 +67,20 @@ export function ReceiptActions({ receipt, role = "admin" }: ReceiptActionsProps)
     }
   };
 
-  const backHref = role === "agent" ? "/agent/customers" : "/admin/collections";
+  const backHref =
+    customBackHref ||
+    (role === "customer"
+      ? "/customer/receipts"
+      : role === "agent"
+      ? "/agent/customers"
+      : "/admin/collections");
+
+  const backLabel =
+    role === "customer"
+      ? "Back to receipts"
+      : role === "agent"
+      ? "Back to customers"
+      : "Back to collections";
 
   return (
     <div className="space-y-3 pt-2" data-no-print>
@@ -97,17 +115,17 @@ export function ReceiptActions({ receipt, role = "admin" }: ReceiptActionsProps)
         </p>
       </div>
 
-      {/* 3. Back to collections */}
+      {/* 3. Back button */}
       <Link href={backHref} className="block">
         <Button
           type="button"
           variant="outline"
           size="lg"
           icon={<ArrowLeft className="w-4.5 h-4.5 text-[#1F6BFF]" />}
-          aria-label="Back to collections"
+          aria-label={backLabel}
           className="w-full h-12 text-base font-semibold justify-center text-[#1F6BFF] border-[#BFDBFE] hover:bg-[#F3F7FF]"
         >
-          Back to collections
+          {backLabel}
         </Button>
       </Link>
 

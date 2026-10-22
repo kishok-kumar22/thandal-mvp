@@ -2,18 +2,23 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ChevronRight, Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { FormField } from "@/components/ui/FormField";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Button } from "@/components/ui/Button";
 import { Toast } from "@/components/ui/Toast";
+import { InfoPanel } from "@/components/ui/InfoPanel";
 import { LoanSummaryCard } from "./LoanSummaryCard";
 import { FirstInstalmentCard } from "./FirstInstalmentCard";
 import { DisbursementPreviewMiniCard } from "./DisbursementPreviewMiniCard";
 import { DraftBanner } from "./DraftBanner";
 import { useLoanDraft } from "./LoanDraftContext";
 import { mockCustomersList } from "@/data/mockCustomers";
+import { mockLoansList } from "@/data/mockLoans";
 import { mockAgentsList } from "@/data/mockAgents";
+import { formatINR } from "@/lib/format";
+import { ALLOW_MULTIPLE_ACTIVE_LOANS } from "@/config/loanRules";
 import {
   calculateLoan,
   type Frequency,
@@ -80,6 +85,12 @@ export function LoanTermsForm() {
     }
   };
 
+  const existingLoan = draft.customerId
+    ? mockLoansList.find(
+        (l) => l.customerId === draft.customerId && (l.status === "active" || l.status === "overdue")
+      )
+    : undefined;
+
   // Recompute financials live using calculateLoan
   const calc = calculateLoan({
     principal: draft.principal,
@@ -94,6 +105,9 @@ export function LoanTermsForm() {
     switch (field) {
       case "customerId":
         if (!draft.customerId) return "Customer is required";
+        if (!ALLOW_MULTIPLE_ACTIVE_LOANS && existingLoan) {
+          return `${existingLoan.customerName} already has an active loan (${existingLoan.id}).`;
+        }
         return undefined;
 
       case "principal":
@@ -219,6 +233,25 @@ export function LoanTermsForm() {
                   aria-hidden="true"
                 />
               </div>
+              {existingLoan && (
+                <div className="mt-2.5">
+                  <InfoPanel
+                    variant={ALLOW_MULTIPLE_ACTIVE_LOANS ? "warning" : "error"}
+                    className="text-xs"
+                  >
+                    <span>
+                      {existingLoan.customerName} already has an active loan (
+                      <Link
+                        href={`/admin/loans/${existingLoan.id}`}
+                        className="font-bold underline hover:opacity-80"
+                      >
+                        {existingLoan.id}
+                      </Link>
+                      , {formatINR(existingLoan.remaining)} remaining).
+                    </span>
+                  </InfoPanel>
+                </div>
+              )}
             </FormField>
 
             {/* Row: Principal Amount (₹) | Interest Rate (%) */}
@@ -443,7 +476,7 @@ export function LoanTermsForm() {
         {/* Right Column: 3 Stacked Cards */}
         <div className="space-y-6">
           {/* Card 1: Loan Summary */}
-          <LoanSummaryCard calc={calc} />
+          <LoanSummaryCard calc={calc} frequency={draft.frequency} />
 
           {/* Card 2: First Instalment at Disbursement Toggle */}
           <FirstInstalmentCard
@@ -484,6 +517,7 @@ export function LoanTermsForm() {
             variant="primary"
             size="md"
             onClick={handlePreviewSchedule}
+            disabled={!ALLOW_MULTIPLE_ACTIVE_LOANS && Boolean(existingLoan)}
             className="w-full sm:w-auto px-6 flex items-center justify-center gap-2"
           >
             Preview schedule

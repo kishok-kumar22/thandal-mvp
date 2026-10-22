@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
+import Link from "next/link";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Paperclip, Loader2 } from "lucide-react";
+import { Paperclip, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { updateSupportStatus } from "@/lib/mockApi";
-import type { SupportRequest, SupportStatus } from "@/data/mockSupport";
+import type { SupportRequest, SupportStatus, SupportKind } from "@/data/mockSupport";
 
 interface SupportRequestModalProps {
   request: SupportRequest | null;
@@ -57,6 +58,18 @@ export function SupportRequestModal({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const getKindLabel = (kind?: SupportKind) => {
+    switch (kind) {
+      case "callback":
+        return "Call back";
+      case "profile_correction":
+        return "Profile correction";
+      case "general":
+      default:
+        return "General";
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -72,6 +85,12 @@ export function SupportRequestModal({
             <p className="font-bold text-[#0B1B3F]">{request.customerName || request.customerId}</p>
           </div>
           <div>
+            <p className="text-xs text-[#64748B] font-medium">Request Type</p>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-[#EEF2F7] text-[#0B1B3F] mt-0.5">
+              {getKindLabel(request.kind)}
+            </span>
+          </div>
+          <div>
             <p className="text-xs text-[#64748B] font-medium">Related Loan</p>
             <p className="font-bold text-[#0B1B3F]">{request.loanId || "None (General)"}</p>
           </div>
@@ -79,10 +98,30 @@ export function SupportRequestModal({
             <p className="text-xs text-[#64748B] font-medium">Submitted on</p>
             <p className="font-medium text-[#334155]">{request.createdAt.slice(0, 10)}</p>
           </div>
-          <div>
-            <p className="text-xs text-[#64748B] font-medium">Customer ID</p>
-            <p className="font-mono text-xs font-semibold text-[#1F6BFF]">{request.customerId}</p>
-          </div>
+
+          {/* Meta details: Field to correct or Preferred time */}
+          {request.meta?.field && (
+            <div className="col-span-2 pt-2 border-t border-[#E2E8F0] flex items-center justify-between">
+              <div>
+                <p className="text-xs text-[#64748B] font-medium">Field requiring correction</p>
+                <p className="font-bold text-[#0B1B3F] capitalize">{request.meta.field}</p>
+              </div>
+              <Link
+                href={`/admin/customers/${request.customerId}/edit`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#1F6BFF] hover:underline"
+              >
+                <span>Open customer</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
+
+          {request.meta?.preferredTime && (
+            <div className="col-span-2 pt-2 border-t border-[#E2E8F0]">
+              <p className="text-xs text-[#64748B] font-medium">Preferred call back window</p>
+              <p className="font-bold text-[#0B1B3F] capitalize">{request.meta.preferredTime}</p>
+            </div>
+          )}
         </div>
 
         {/* Subject */}
@@ -147,7 +186,7 @@ export function SupportRequestModal({
           </Button>
           <Button variant="primary" onClick={handleSave} disabled={isPending}>
             {isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-            Save status
+            <span>Save status</span>
           </Button>
         </div>
       </div>

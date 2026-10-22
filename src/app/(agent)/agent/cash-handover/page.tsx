@@ -11,6 +11,8 @@ export const metadata = {
   description: "Record physical cash handover amount to designated branch or vault recipient.",
 };
 
+export const instant = false;
+
 export default async function AgentCashHandoverPage() {
   const currentUser = await getCurrentUser();
 

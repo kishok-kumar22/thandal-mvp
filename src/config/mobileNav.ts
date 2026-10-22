@@ -7,6 +7,7 @@ import {
   MoreHorizontal,
   Calendar,
   Headset,
+  User,
 } from "lucide-react";
 import type { Role } from "./navigation";
 
@@ -101,6 +102,12 @@ export const mobileNavConfig: Record<Role, MobileNavItem[]> = {
       label: "Support",
       href: "/customer/support",
       icon: Headset,
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      href: "/customer/profile",
+      icon: User,
     },
   ],
 };

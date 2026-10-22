@@ -1,12 +1,15 @@
 import React from "react";
 import { formatINR } from "@/lib/format";
-import type { LoanCalculation } from "@/lib/loan";
+import type { LoanCalculation, Frequency } from "@/lib/loan";
+import { INSTALMENT_NAME } from "@/config/loanLabels";
 
 interface LoanSummaryCardProps {
   calc: LoanCalculation;
+  frequency?: Frequency;
 }
 
-export function LoanSummaryCard({ calc }: LoanSummaryCardProps) {
+export function LoanSummaryCard({ calc, frequency = "daily" }: LoanSummaryCardProps) {
+  const instalmentLabel = INSTALMENT_NAME[frequency] || "Instalment";
   return (
     <div className="bg-white rounded-xl border border-[#E6ECF5] p-5 shadow-xs">
       <h2 className="text-base font-bold text-[#0B1B3F] mb-4">Loan summary</h2>
@@ -43,7 +46,7 @@ export function LoanSummaryCard({ calc }: LoanSummaryCardProps) {
         <div className="border-t border-[#CBD5E1]/60" />
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-[#64748B]">Instalment amount</span>
+          <span className="text-[#64748B]">{instalmentLabel}</span>
           <span className="font-bold text-[#0B1B3F] tabular-nums">
             {formatINR(calc.instalment)}
           </span>

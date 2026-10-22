@@ -15,6 +15,7 @@ export interface ServerUser {
   status: UserStatus;
   passwordHash: string;
   salt: string;
+  passwordChangedAt?: number; // epoch seconds
 }
 
 /**
@@ -31,8 +32,22 @@ export interface ServerUser {
  */
 export const DEV_PASSWORD = "Password@123";
 
-function hashPassword(password: string, salt: string): string {
+export function hashPassword(password: string, salt: string): string {
   return crypto.scryptSync(password, salt, 64).toString("hex");
+}
+
+export function updateUserPassword(
+  userId: string,
+  newPasswordHash: string,
+  newSalt: string
+): { success: boolean; passwordChangedAt: number } {
+  const user = mockServerUsers.find((u) => u.id === userId);
+  if (!user) return { success: false, passwordChangedAt: 0 };
+  const changedAt = Math.floor(Date.now() / 1000);
+  user.passwordHash = newPasswordHash;
+  user.salt = newSalt;
+  user.passwordChangedAt = changedAt;
+  return { success: true, passwordChangedAt: changedAt };
 }
 
 function createSeedUser(user: {

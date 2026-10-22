@@ -7,6 +7,7 @@ import { AuditFilters } from "@/components/audit/AuditFilters";
 import { AuditTable } from "@/components/audit/AuditTable";
 import { mockAuditEntriesList } from "@/data/mockAudit";
 import { filterAuditEntries, getDistinctActors } from "@/lib/audit";
+import { SettingsHeader } from "@/components/settings/SettingsHeader";
 
 interface RolesPageProps {
   searchParams?: Promise<{
@@ -17,6 +18,8 @@ interface RolesPageProps {
     to?: string;
   }>;
 }
+
+export const instant = false;
 
 export default async function SettingsRolesPage(props: RolesPageProps) {
   const searchParams = props.searchParams ? await props.searchParams : {};
@@ -37,6 +40,10 @@ export default async function SettingsRolesPage(props: RolesPageProps) {
 
   return (
     <div className="space-y-6">
+      <SettingsHeader
+        title="Settings"
+        subtitle="Manage role permissions and review administrative audit events."
+      />
       {/* Card 1: Role Permissions */}
       <div className="bg-white rounded-xl border border-[#E6ECF5] p-5 sm:p-6 shadow-sm space-y-4">
         <div>

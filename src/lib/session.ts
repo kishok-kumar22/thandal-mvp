@@ -1,5 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { getSessionCookie, verifySessionToken } from "./auth/session";
 import { getUserById, type ServerUser } from "@/server/mockUsers";
 import { ROLE_HOMES, type SessionRole, type SessionUser, DEMO_USERS } from "@/config/auth";
@@ -33,6 +34,7 @@ export function serverUserToSessionUser(u: ServerUser): SessionUser {
  */
 export async function getCurrentUser(): Promise<SessionUser | null> {
   try {
+    await connection();
     const token = await getSessionCookie();
     if (!token) return null;
 
@@ -42,8 +44,13 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     const user = getUserById(payload.uid);
     if (!user || user.status !== "active") return null;
 
+    // Invalidate sessions issued prior to password change
+    if (user.passwordChangedAt && payload.iat < user.passwordChangedAt) {
+      return null;
+    }
+
     return serverUserToSessionUser(user);
-  } catch (err) {
+  } catch {
     return null;
   }
 }

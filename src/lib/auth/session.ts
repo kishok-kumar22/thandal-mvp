@@ -1,6 +1,7 @@
 import "server-only";
 import crypto from "crypto";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import type { UserRole } from "@/server/mockUsers";
 import { SESSION_COOKIE_NAME } from "@/config/auth";
 export { SESSION_COOKIE_NAME };
@@ -138,6 +139,7 @@ export async function clearSessionCookie(): Promise<void> {
  * Reads the raw thandal_session cookie from incoming request.
  */
 export async function getSessionCookie(): Promise<string | undefined> {
+  await connection();
   const cookieStore = await cookies();
   return cookieStore.get(SESSION_COOKIE_NAME)?.value;
 }
